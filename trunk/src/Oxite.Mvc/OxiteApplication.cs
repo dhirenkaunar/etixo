@@ -18,6 +18,8 @@ using Oxite.Routing;
 
 namespace Oxite.Mvc
 {
+    using ViewModel;
+
     // Note: For instructions on enabling IIS6 or IIS7 classic mode, 
     // visit http://go.microsoft.com/?LinkId=9394801
 
@@ -87,11 +89,27 @@ namespace Oxite.Mvc
         protected virtual void OnStart()
         {
             RegisterRoutes();
+            RegisterModelBinders();
 
             ViewEngines.Engines.Clear();
             ViewEngines.Engines.Add(new OxiteViewEngine(Config.Site.ThemeDefault));
 
             backgroundServiceExecutors = BackgroundServicesExecutor.Start(Config);
+        }
+
+        private static void RegisterModelBinders()
+        {
+            //add all ViewModelBinders
+            Type viewModel = typeof (IViewModelBinder);
+            foreach (Type type in viewModel.Assembly.GetTypes())
+            {
+                if (!typeof(IViewModelBinder).IsAssignableFrom(type)) continue;
+                if (type.IsInterface || type.IsAbstract) continue;
+
+                var instance = Activator.CreateInstance(type) as IViewModelBinder;
+                if (instance == null) continue;
+                ModelBinders.Binders.Add(instance.ViewModelType, instance);
+            }
         }
 
         protected virtual void OnEnd()

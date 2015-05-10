@@ -1,0 +1,1 @@
+This is a fork of the Oxite Blog Engine located at http://www.codeplex.com/oxite
